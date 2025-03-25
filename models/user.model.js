@@ -43,15 +43,33 @@ User.getAll = (callback) => {
 };
 
 User.insert = (user, callBack) => {
-  const sqlString = "INSERT INTO Users SET ?";
-  db.query(sqlString, user, (err, res) => {
-    if (err) {
-      callBack(err);
-      return;
-    }
-    callBack({ id: res.insertId, ...user });
+  // Kiểm tra xem email hoặc phone đã tồn tại chưa
+  const checkQuery = `SELECT * FROM Users WHERE email = ? OR phone = ?`;
+
+  db.query(checkQuery, [user.email, user.phone], (err, results) => {
+      if (err) {
+          callBack({ message: "Lỗi kiểm tra dữ liệu", error: err });
+          return;
+      }
+
+      if (results.length > 0) {
+          // Nếu đã có email hoặc phone, trả về lỗi
+          callBack({ message: "Email hoặc số điện thoại đã được đăng ký. Vui lòng nhập lại!" });
+          return;
+      }
+
+      // Nếu chưa tồn tại, tiến hành INSERT
+      const insertQuery = "INSERT INTO Users SET ?";
+      db.query(insertQuery, user, (err, res) => {
+          if (err) {
+              callBack({ message: "Lỗi khi chèn dữ liệu", error: err });
+              return;
+          }
+          callBack({ id: res.insertId, ...user });
+      });
   });
 };
+
 
 User.update = (user, id, callBack) => {
   const sqlString = "UPDATE Users SET ? WHERE user_id = ?";

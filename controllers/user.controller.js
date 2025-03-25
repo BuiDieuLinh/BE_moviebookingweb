@@ -1,37 +1,39 @@
 const user = require("../models/user.model");
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs')
 
 const SECRET_KEY = 'your_jwt_secret_key';
 
 const login = (req, res) => {
     const { username, password } = req.body;
 
-    console.log("📌 Dữ liệu nhận từ Postman:", req.body);
+    console.log("Dữ liệu nhận từ Postman:", req.body);
 
     user.getByUsername(username, (err, foundUser) => {
         if (err) {
-            console.error("❌ Lỗi truy vấn database:", err);
+            console.error("Lỗi truy vấn database:", err);
             return res.status(500).send('Lỗi server');
         }
 
         if (!foundUser) {
-            console.warn("⚠️ Không tìm thấy user:", username);
+            console.warn("Không tìm thấy user:", username);
             return res.status(400).send('Tên người dùng hoặc mật khẩu không đúng');
         }
 
-        console.log("✅ Tìm thấy user:", foundUser);
+        console.log("Tìm thấy user:", foundUser);
 
-        // Kiểm tra mật khẩu (nếu chưa mã hóa)
-        if (password !== foundUser.password) {
-            console.warn("⚠️ Mật khẩu không đúng:", password);
+        // so sánh input pw vs pass đc mã hoá
+        const isVaildPass = bcrypt.compareSync(password, foundUser.password);
+        if (!isVaildPass) {
+            console.warn("Mật khẩu không đúng:", password);
             return res.status(400).send('Tên người dùng hoặc mật khẩu không đúng');
         }
 
         // Tạo JWT Token
         const token = jwt.sign({ user_id: foundUser.user_id, username: foundUser.username }, SECRET_KEY, { expiresIn: '1h' });
 
-        console.log("✅ Đăng nhập thành công, trả về token");
-        res.json({ token });
+        console.log("Đăng nhập thành công, trả về token");
+        res.status(200).json({ token });
     });
 };
 
@@ -56,7 +58,22 @@ const getById = (req, res) => {
 
 const insert = (req, res) => {
     const u = req.body;
+
+    // Hash mật khẩu trước khi lưu vào database
+    const hashedPassword = bcrypt.hashSync(u.password, 12);
+    console.log(hashedPassword);
+    if (!hashedPassword) {
+        return res.json({ message: 'Không thể tạo mật khẩu' });
+    }
+
+    // Cập nhật mật khẩu đã hash vào object user
+    u.password = hashedPassword;
+
+    // Chèn user vào database
     user.insert(u, (result) => {
+        if (result.message) {
+            return res.status(400).json(result); // Trả về lỗi nếu có
+        }
         res.send(result);
     });
 };
