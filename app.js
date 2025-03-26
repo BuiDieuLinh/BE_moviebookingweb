@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 // Import các router
 var userRouter = require('./routes/user.route');
@@ -24,7 +24,6 @@ var app = express();
 // View engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-const SECRET_KEY = 'your_secret_key';
 
 
 // Middleware

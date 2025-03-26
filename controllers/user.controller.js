@@ -2,7 +2,6 @@ const user = require("../models/user.model");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs')
 
-const SECRET_KEY = 'your_jwt_secret_key';
 
 const login = (req, res) => {
     const { username, password } = req.body;
@@ -30,7 +29,7 @@ const login = (req, res) => {
         }
 
         // Tạo JWT Token
-        const token = jwt.sign({ user_id: foundUser.user_id, username: foundUser.username }, SECRET_KEY, { expiresIn: '1h' });
+        const token = jwt.sign({ user_id: foundUser.user_id, username: foundUser.username, role: foundUser.role }, process.env.SECRET_KEY, { expiresIn: '1h' });
 
         console.log("Đăng nhập thành công, trả về token");
         res.status(200).json({ token });
