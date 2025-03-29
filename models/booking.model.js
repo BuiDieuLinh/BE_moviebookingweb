@@ -3,7 +3,7 @@ const db = require("../common/db");
 const Booking = ( booking) => {
   this.booking_id = booking.booking_id;
   this.user_id = booking.user_id;
-  this.showtime_id = booking.showtime_id;
+  this.screening_id = booking.screening_id;
   this.created_at = booking.created_at;
   this.total_price = booking.total_price;
   this.status = booking.status;

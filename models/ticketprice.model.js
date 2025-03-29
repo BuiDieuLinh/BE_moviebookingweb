@@ -2,7 +2,7 @@ const db = require("../common/db");
 
 const TicketPrice = ( ticketprice) => {
   this.price_id = ticketprice.price_id;
-  this.showtime_id = ticketprice.showtime_id;
+  this.screening_id = ticketprice.screening_id;
   this.seat_type = ticketprice.seat_type;
   this.price = ticketprice.price;
   this.discount = ticketprice.discount;

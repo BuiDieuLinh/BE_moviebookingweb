@@ -3,7 +3,6 @@ const db = require("../common/db");
 const Showtime = ( showtime) => {
   this.showtime_id = showtime.showtime_id;
   this.movie_id = showtime.movie_id;
-  this.room_id = showtime.room_id;
   this.start_time = showtime.start_time;
   this.end_time = showtime.end_time;
 };
