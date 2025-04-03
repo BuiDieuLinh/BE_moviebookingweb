@@ -18,7 +18,7 @@ Showtime.getById = (id, callback) => {
 };
 
 Showtime.getAll = (callback) => {
-  const sqlString = "SELECT * FROM Showtimes ";
+  const sqlString = "SELECT st.*, m.title as 'movie_title' FROM Showtimes st JOIN Movies m ON st.movie_id = m.movie_id ";
   db.query(sqlString, (err, result) => {
     if (err) {
       return callback(err);
@@ -26,6 +26,35 @@ Showtime.getAll = (callback) => {
     callback(result);
   });
 };
+
+Showtime.getByDate = (callback) =>{
+  const sql = `SELECT 
+                m.movie_id,
+                m.poster_url,
+                m.age_restriction,
+                m.title,
+                m.duration, 
+                m.genre, 
+                m.release_date, 
+                s.screening_date, 
+                s.screening_format,
+                s.start_time
+            FROM Screenings s
+            JOIN Showtimes sh ON s.showtime_id = sh.showtime_id
+            JOIN Movies m ON sh.movie_id = m.movie_id
+            WHERE sh.start_time <= CURDATE()  
+            AND sh.end_time >= CURDATE()       
+            AND s.screening_date BETWEEN CURDATE() AND CURDATE() + INTERVAL 5 DAY
+            AND (s.screening_date > CURDATE() OR s.start_time >= CURTIME()) 
+            ORDER BY m.title, s.screening_date, s.start_time;
+            `
+  db.query(sql, (err, result) => {
+    if (err) {
+      return callback(err);
+    }
+    callback(result);
+  });
+}
 
 Showtime.insert = (showtime, callBack) => {
   const sqlString = "INSERT INTO Showtimes SET ?";

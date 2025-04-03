@@ -14,6 +14,11 @@ module.exports = {
     });
   },
 
+  getByDate: (req, res) => {
+    showtime.getByDate((result) => {
+      res.send(result)
+    })
+  }, 
   insert: (req, res) => {
     const u = req.body;
     showtime.insert(u, (result) => {

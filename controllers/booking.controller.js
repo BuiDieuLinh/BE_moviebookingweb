@@ -15,9 +15,18 @@ module.exports = {
   },
 
   insert: (req, res) => {
-    const u = req.body;
-    booking.insert(u, (result) => {
-      res.send(result);
+    const { bookings, details } = req.body; // Nhận booking và details từ body
+  
+    // Kiểm tra dữ liệu đầu vào
+    if (!bookings || !details) {
+      return res.status(400).json({ error: 'Missing booking or details data' });
+    }
+  
+    booking.insert(bookings, details, (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.status(201).json(result);
     });
   },
 

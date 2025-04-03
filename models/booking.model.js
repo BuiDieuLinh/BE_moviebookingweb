@@ -1,4 +1,5 @@
 const db = require("../common/db");
+const { v4: uuidv4 } = require('uuid')
 
 const Booking = ( booking) => {
   this.booking_id = booking.booking_id;
@@ -30,14 +31,76 @@ Booking.getAll = (callback) => {
   });
 };
 
-Booking.insert = (booking, callBack) => {
-  const sqlString = "INSERT INTO Bookings SET ?";
-  db.query(sqlString, booking, (err, res) => {
+Booking.insert = (bookings, bookingDetails, callBack) => {
+  db.beginTransaction((err) => {
     if (err) {
+      console.error("Lỗi bắt đầu transaction:", err);
       callBack(err);
       return;
     }
-    callBack({ id: res.insertId, ...booking });
+
+    const bookingId = uuidv4(); // Sinh UUID trong Node.js
+    console.log("bookingId sinh trong backend:", bookingId);
+
+    const sqlString = "INSERT INTO Bookings (booking_id, user_id, screening_id, total_price, status) VALUES (?, ?, ?, ?, ?)";
+    const bookingValues = [
+      bookingId,
+      bookings.user_id,
+      bookings.screening_id,
+      bookings.total_price,
+      bookings.status || "pending",
+    ];
+
+    db.query(sqlString, bookingValues, (err, res) => {
+      if (err) {
+        console.error("Lỗi khi chèn vào Bookings:", err);
+        return db.rollback(() => {
+          callBack(err);
+        });
+      }
+
+      const bookingResponse = { id: bookingId, ...bookings };
+
+      let detailsToInsert = [];
+      if (Array.isArray(bookingDetails)) {
+        detailsToInsert = bookingDetails.map((detail) => ({
+          ...detail,
+          booking_id: bookingId,
+        }));
+      } else {
+        detailsToInsert = [{ ...bookingDetails, booking_id: bookingId }];
+      }
+
+      const detailSql = "INSERT INTO BookingDetails (booking_id, seat_id, price) VALUES ?";
+      const detailValues = detailsToInsert.map((detail) => [
+        detail.booking_id,
+        detail.seat_id,
+        detail.price,
+      ]);
+
+      db.query(detailSql, [detailValues], (err, detailRes) => {
+        if (err) {
+          console.error("Lỗi khi chèn vào BookingDetails:", err);
+          return db.rollback(() => {
+            callBack(err);
+          });
+        }
+
+        db.commit((err) => {
+          if (err) {
+            console.error("Lỗi khi commit:", err);
+            return db.rollback(() => {
+              callBack(err);
+            });
+          }
+
+          callBack(null, {
+            bookings: bookingResponse,
+            details: detailsToInsert,
+          });
+        });
+      });
+    });
   });
 };
 

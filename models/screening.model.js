@@ -22,7 +22,7 @@ Screening.getById = (id, callback) => {
 };
 
 Screening.getAll = (callback) => {
-  const sqlString = "SELECT s.*, m.title AS movie_title, r.room_name AS room_name FROM Screenings s JOIN Showtimes st ON s.showtime_id = st.showtime_id JOIN Movies m ON st.movie_id = m.movie_id JOIN Rooms r ON r.room_id = s.room_id";
+  const sqlString = "SELECT s.*, m.title AS movie_title, r.room_name AS room_name, r.room_type AS room_type FROM Screenings s JOIN Showtimes st ON s.showtime_id = st.showtime_id JOIN Movies m ON st.movie_id = m.movie_id JOIN Rooms r ON r.room_id = s.room_id";
   db.query(sqlString, (err, result) => {
     if (err) {
       return callback(err);
