@@ -14,11 +14,22 @@ module.exports = {
     });
   },
 
+  getByUserId: (req, res) => {
+    const user_id = req.params.user_id;
+
+    booking.getByUserId(user_id, (err, result) => {
+      if (err) {
+        return res.status(500).json({ message: 'Lỗi server', error: err });
+      }
+      res.status(200).json(result);
+    });
+  },
+
   insert: (req, res) => {
-    const { bookings, details } = req.body; // Nhận booking và details từ body
+    const { bookings, details} = req.body; // Nhận booking và details từ body
   
     // Kiểm tra dữ liệu đầu vào
-    if (!bookings || !details) {
+    if (!bookings || !details ) {
       return res.status(400).json({ error: 'Missing booking or details data' });
     }
   
