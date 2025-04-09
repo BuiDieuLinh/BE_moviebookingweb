@@ -1,0 +1,7 @@
+module.exports = {
+    "vnp_TmnCode":"QF9M1HRI",
+    "vnp_HashSecret":"TLMZMJNEK0KZXU8EOGRHYV75GS834PCS",
+    "vnp_Url":"https://sandbox.vnpayment.vn/paymentv2/vpcpay.html",
+    "vnp_Api":"https://sandbox.vnpayment.vn/merchant_webapi/api/transaction",
+    "vnp_ReturnUrl": "http://localhost:3000/payment"
+  }

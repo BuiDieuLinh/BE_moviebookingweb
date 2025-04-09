@@ -19,6 +19,7 @@
     "axios": "^1.8.4",
     "bcryptjs": "^3.0.2",
     "body-parser": "^1.20.3",
+    "config": "^3.3.12",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
@@ -28,11 +29,13 @@
     "express-list-endpoints": "^7.1.1",
     "http-errors": "^2.0.0",
     "jsonwebtoken": "^9.0.2",
+    "moment": "^2.30.1",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.2",
     "mysql2": "^3.12.0",
     "node-fetch": "^3.3.2",
     "qrcode": "^1.5.4",
+    "request": "^2.88.2",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
