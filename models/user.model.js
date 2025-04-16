@@ -43,28 +43,30 @@ User.getAll = (callback) => {
 };
 
 User.insert = (user, callBack) => {
-  // Kiểm tra xem email hoặc phone đã tồn tại chưa
-  const checkQuery = `SELECT * FROM Users WHERE email = ? OR phone = ?`;
+  const checkQuery = `SELECT * FROM Users WHERE email = ? OR username = ?`;
 
-  db.query(checkQuery, [user.email, user.phone], (err, results) => {
+  db.query(checkQuery, [user.email, user.username], (err, results) => {
       if (err) {
-          callBack({ message: "Lỗi kiểm tra dữ liệu", error: err });
-          return;
+          return callBack({ error: true, message: "Lỗi kiểm tra dữ liệu", field: null });
       }
 
       if (results.length > 0) {
-          // Nếu đã có email hoặc phone, trả về lỗi
-          callBack({ message: "Email hoặc số điện thoại đã được đăng ký. Vui lòng nhập lại!" });
-          return;
+          const existing = results[0];
+          const fieldConflict = existing.email === user.email ? 'email' : 'username';
+
+          return callBack({
+              error: true,
+              message: `${fieldConflict === 'email' ? 'Email' : 'Username'} đã được đăng ký. Vui lòng nhập lại!`,
+              field: fieldConflict
+          });
       }
 
-      // Nếu chưa tồn tại, tiến hành INSERT
       const insertQuery = "INSERT INTO Users SET ?";
       db.query(insertQuery, user, (err, res) => {
           if (err) {
-              callBack({ message: "Lỗi khi chèn dữ liệu", error: err });
-              return;
+              return callBack({ error: true, message: "Lỗi khi chèn dữ liệu", field: null });
           }
+
           callBack({ id: res.insertId, ...user });
       });
   });

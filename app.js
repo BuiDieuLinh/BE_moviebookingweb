@@ -19,6 +19,7 @@ var movieRouter = require('./routes/movie.route');
 var ticketpriceRouter = require('./routes/ticketprice.route');
 var bookingdetailRouter = require('./routes/bookingdetail.route');
 var bookingRouter = require('./routes/booking.route');
+var reportRouter = require('./routes/report.route');
 
 var app = express();
 
@@ -48,6 +49,7 @@ app.use('/movies', movieRouter);
 app.use('/ticketprices', ticketpriceRouter);
 app.use('/bookingdetails', bookingdetailRouter);
 app.use('/bookings', bookingRouter);
+app.use('/reports', reportRouter);
 
 
 // Route mặc định để kiểm tra server

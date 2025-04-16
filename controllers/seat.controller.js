@@ -15,9 +15,9 @@ module.exports = {
   },
 
   getByRoomId: (req, res) => {
-    const { room_id } = req.params
+    const { screening_id, room_id } = req.params
     console.log("Received room_id:", room_id); 
-    seat.getByRoomId(room_id, (err, results) => {
+    seat.getByRoomId( screening_id, room_id, (err, results) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }

@@ -47,7 +47,6 @@ module.exports = {
  updateQRCodeAndStatus: async (req, res) => {
     const id = req.params.id;
     console.log(id)
-    const { status } = req.body;
   
     try {
       // Lấy thông tin đơn hàng
@@ -64,7 +63,7 @@ module.exports = {
         user_id: realData.user_id,
         screening_id: realData.screening_id,
         total_price: realData.total_price,
-        status: status || 'paid'
+        status: 'paid'
       });
       console.log(qrText)
 
@@ -85,7 +84,7 @@ module.exports = {
       // 6. Cập nhật trạng thái và qr_code
       const updateData = {
         qr_code: qrPath,
-        status: status || 'paid'
+        status: 'paid'
       };
 
       booking.update(updateData, id, (result) => {

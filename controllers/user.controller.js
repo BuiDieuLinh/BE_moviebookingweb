@@ -58,22 +58,21 @@ const getById = (req, res) => {
 const insert = (req, res) => {
     const u = req.body;
 
-    // Hash mật khẩu trước khi lưu vào database
+    // Hash mật khẩu
     const hashedPassword = bcrypt.hashSync(u.password, 12);
-    console.log(hashedPassword);
     if (!hashedPassword) {
-        return res.json({ message: 'Không thể tạo mật khẩu' });
+        return res.status(500).json({ field: 'password', message: 'Không thể tạo mật khẩu' });
     }
 
-    // Cập nhật mật khẩu đã hash vào object user
     u.password = hashedPassword;
 
-    // Chèn user vào database
+    // Gọi hàm insert từ model
     user.insert(u, (result) => {
-        if (result.message) {
-            return res.status(400).json(result); // Trả về lỗi nếu có
+        if (result.error) {
+            // Trả lỗi kèm trường cụ thể (field) để FE hiển thị chính xác
+            return res.status(400).json({ field: result.field, message: result.message });
         }
-        res.send(result);
+        res.status(201).json(result);
     });
 };
 
