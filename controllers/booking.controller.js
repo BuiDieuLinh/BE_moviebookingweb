@@ -17,6 +17,7 @@ module.exports = {
     });
   },
 
+  
   getByUserId: (req, res) => {
     const user_id = req.params.user_id;
 
@@ -101,6 +102,19 @@ module.exports = {
       console.error('Lỗi tạo QR:', err);
       res.status(500).json({ message: 'Lỗi tạo mã QR hoặc cập nhật đơn hàng' });
     }
+  },
+
+  updateStatus: (req, res) => {
+    const booking_id = req.params.id;
+    const updateStatus = {
+      status: 'canceled'
+    }
+    booking.update(updateStatus, booking_id, (result) =>{
+      res.json({
+        booking_id: booking_id,
+        status: updateStatus.status
+      })
+    })
   },
 
   delete: (req, res) => {

@@ -30,29 +30,35 @@ Seat.getAll = (callback) => {
 Seat.getByRoomId = (room_id, screening_id, callBack) => {
   console.log(room_id)
   const sql = `SELECT 
-                  s.seat_id, 
-                  s.seat_number, 
-                  s.seat_type, 
-                  COALESCE(
-                      CASE 
-                          WHEN bt.detail_id IS NOT NULL 
-                          AND b.screening_id = ? 
-                          THEN 'booked' 
-                          ELSE 'available' 
-                      END, 
-                      'available'
-                  ) AS seat_status
-              FROM 
-                  Seats s
-              LEFT JOIN 
-                  BookingDetails bt ON bt.seat_id = s.seat_id
-              LEFT JOIN 
-                  Bookings b ON b.booking_id = bt.booking_id 
-                  AND b.screening_id = ?  -- Thêm điều kiện này vào JOIN để chỉ lấy booking của suất chiếu hiện tại
-              WHERE 
-                  s.room_id = ?  -- Lọc theo phòng
+            s.seat_id, 
+            s.seat_number, 
+            s.seat_type, 
+            COALESCE(
+                CASE 
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM BookingDetails bt
+                        JOIN Bookings b ON b.booking_id = bt.booking_id
+                        WHERE bt.seat_id = s.seat_id
+                        AND b.status = 'paid'
+                        AND b.screening_id = ?
+                    ) 
+                    THEN 'booked' 
+                    ELSE 'available' 
+                END, 
+                'available'
+            ) AS seat_status,
+            SUBSTRING(s.seat_number, 1, 1) AS seat_row,
+            CAST(SUBSTRING(s.seat_number, 2) AS UNSIGNED) AS seat_num
+        FROM 
+            Seats s
+        WHERE 
+            s.room_id = ?
+        ORDER BY 
+            seat_row ASC,
+            seat_num ASC;
                 `;
-  db.query(sql, [screening_id,screening_id,room_id], (err, results) => {
+  db.query(sql, [screening_id,room_id], (err, results) => {
     if (err) {
       return callBack(err);
     }

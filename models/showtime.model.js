@@ -32,6 +32,7 @@ Showtime.getByDate = (callback) =>{
                 m.movie_id,
                 m.poster_url,
                 m.age_restriction,
+                m.origin,
                 m.title,
                 m.duration, 
                 m.genre, 

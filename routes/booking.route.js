@@ -6,8 +6,8 @@ router.get('/', bookingController.getAll);
 router.get('/:id', bookingController.getById);
 router.get('/user/:user_id', bookingController.getByUserId);
 router.post('/', bookingController.insert);
-// router.put('/:id', bookingController.update);
 router.delete('/:id', bookingController.delete); 
 router.patch('/:id/qr', bookingController.updateQRCodeAndStatus);
+router.patch('/updateStatus/:id', bookingController.updateStatus);
 
 module.exports = router;

@@ -18,7 +18,17 @@ BookingDetail.getById = (id, callback) => {
 };
 
 BookingDetail.getAll = (callback) => {
-  const sqlString = "SELECT * FROM BookingDetails ";
+  const sqlString = `SELECT 
+                    bt.*, 
+                    s.seat_number,
+                    CASE 
+                        WHEN bt.price = 65000 THEN 'VIP'
+                        WHEN bt.price = 60000 THEN 'Thường'
+                        WHEN bt.price = 150000 THEN 'Đôi'
+                        ELSE 'Không xác định' 
+                    END AS seat_type
+                FROM BookingDetails bt 
+                JOIN Seats s ON bt.seat_id = s.seat_id`;
   db.query(sqlString, (err, result) => {
     if (err) {
       return callback(err);

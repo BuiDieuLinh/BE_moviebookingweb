@@ -10,6 +10,8 @@ const Movie = (movie) => {
   this.director = movie.director;
   this.rating = movie.rating;
   this.cast = movie.cast;
+  this.origin = movie.origin;
+  this.age_restriction = movie.age_restriction;
   this.poster_url = movie.poster_url;
   this.trailer_url = movie.trailer_url;
   this.created_at = movie.created_at;

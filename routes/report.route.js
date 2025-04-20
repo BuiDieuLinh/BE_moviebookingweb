@@ -6,7 +6,7 @@ router.get("/report", async (req, res) => {
     try {
         const [rows] = await db.promise().query(`
             SELECT 
-                (SELECT IFNULL(SUM(p.amount), 0)
+                (SELECT IFNULL(SUM(DISTINCT p.amount), 0)
                  FROM Payments p 
                  WHERE DATE(p.created_at) = CURDATE() 
                    AND p.payment_status = 'success') AS revenue_today,

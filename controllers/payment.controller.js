@@ -59,7 +59,7 @@ module.exports = {
     var secretkey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
     var requestId = partnerCode + new Date().getTime();
     var orderId = booking_id;
-    var orderInfo = `thanh toan don ve ${orderId}`; // nội dung giao dịch
+    var orderInfo = `Thanh toan don ve ${orderId}`; // nội dung giao dịch
     var redirectUrl = "http://localhost:3000/payment";
     var ipnUrl = "http://localhost:3000/payment";
     // var ipnUrl = redirectUrl = "https://webhook.site/454e7b77-f177-4ece-8236-ddf1c26ba7f8";
@@ -68,7 +68,6 @@ module.exports = {
     var extraData = ""; //pass empty value if your merchant does not have stores
 
     //before sign HMAC SHA256 with format
-    //accessKey=$accessKey&amount=$amount&extraData=$extraData&ipnUrl=$ipnUrl&orderId=$orderId&orderInfo=$orderInfo&partnerCode=$partnerCode&redirectUrl=$redirectUrl&requestId=$requestId&requestType=$requestType
     var rawSignature = "accessKey="+accessKey+"&amount=" + amount+"&extraData=" + extraData+"&ipnUrl=" + ipnUrl+"&orderId=" + orderId+"&orderInfo=" + orderInfo+"&partnerCode=" + partnerCode +"&redirectUrl=" + redirectUrl+"&requestId=" + requestId+"&requestType=" + requestType
     //puts raw signature
     console.log("--------------------RAW SIGNATURE----------------")

@@ -67,6 +67,7 @@ module.exports = {
         director: req.body.director,
         cast: req.body.cast,
         age_restriction: req.body.age_restriction,
+        origin: req.body.origin,
         poster_url: req.file ? `/images/${req.file.filename}` : null,
         trailer_url: req.body.trailer_url || "",
         created_at: req.body.created_at,
@@ -97,6 +98,7 @@ module.exports = {
         director: req.body.director,
         cast: req.body.cast,
         age_restriction: req.body.age_restriction,
+        origin: req.body.origin,
         trailer_url: req.body.trailer_url || "",
       };
 
