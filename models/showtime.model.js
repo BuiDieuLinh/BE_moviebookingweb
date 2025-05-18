@@ -1,4 +1,5 @@
 const db = require("../common/db");
+const { screening_format, screening_translation, start_time } = require("./screening.model");
 
 const Showtime = ( showtime) => {
   this.showtime_id = showtime.showtime_id;
@@ -8,12 +9,62 @@ const Showtime = ( showtime) => {
 };
 
 Showtime.getById = (id, callback) => {
-  const sqlString = "SELECT * FROM Showtimes WHERE showtime_id = ? ";
-  db.query(sqlString, id, (err, result) => {
+  const sqlString = `
+    SELECT 
+      s.showtime_id,
+      s.movie_id,
+      s.start_time,
+      s.end_time,
+      sc.screening_id,
+      sc.room_id,
+      sc.screening_date,
+      sc.screening_format,
+      sc.screening_translation,
+      m.title AS movie_title,
+      r.room_name,
+      r.room_type
+    FROM Showtimes s
+    LEFT JOIN Screenings sc ON s.showtime_id = sc.showtime_id
+    LEFT JOIN Movies m ON s.movie_id = m.movie_id 
+    LEFT JOIN Rooms r ON sc.room_id = r.room_id
+    WHERE s.showtime_id = ?
+  `;
+  db.query(sqlString, id, (err, results) => {
     if (err) {
       return callback(err);
     }
-    callback(result);
+
+    // Xử lý dữ liệu để tránh lặp showtime
+    // if (results.length === 0) {
+    //   return callback(null, null); // Không tìm thấy showtime
+    // }
+    console.log(results, results[0])
+
+    // Lấy thông tin showtime từ bản ghi đầu tiên
+    const showtime = {
+      showtime_id: results[0].showtime_id,
+      movie_id: results[0].movie_id,
+      start_time: results[0].start_time,
+      end_time: results[0].end_time,
+      // ... các cột khác
+      screenings: results
+        .filter(row => row.screening_id) // Lọc các bản ghi có screening
+        .map(row => ({
+          screening_id: row.screening_id,
+          room_id: row.room_id,
+          room_name: row.room_name,
+          movie_id: row.movie_id,
+          movie_title: row.movie_title,
+          screening_date: row.screening_date,
+          screening_format: row.screening_format,
+          screening_translation: row.screening_translation,
+          start_time: row.start_time,
+          end_time: row.end_time,
+          // ... các cột khác
+        }))
+    };
+
+    callback(showtime);
   });
 };
 

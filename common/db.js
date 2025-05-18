@@ -5,6 +5,7 @@ var db = mysql.createConnection({
     user: "root",
     password: "linh",
     database: "movie_ticket_booking",
-    timezone: '+07:00'
+    timezone: '+07:00',
+    dateStrings: true
 })
 module.exports = db;

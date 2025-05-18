@@ -27,21 +27,7 @@ Screening.getAll = (callback) => {
     if (err) {
       return callback(err);
     }
-    const formattedResults = result.map(row => {
-      // Format lại ngày để tránh lệch múi giờ
-      const screeningDate = new Date(row.screening_date);
-      const [year, month, day] = [
-        screeningDate.getFullYear(),
-        String(screeningDate.getMonth() + 1).padStart(2, '0'),
-        String(screeningDate.getDate()).padStart(2, '0')
-      ];
-
-      return {
-        ...row,
-        screening_date: `${year}-${month}-${day}`
-      };
-    });
-    callback(formattedResults);
+    callback(result);
   });
 };
 
