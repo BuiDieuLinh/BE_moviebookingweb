@@ -13,13 +13,15 @@ Showtime.getById = (id, callback) => {
     SELECT 
       s.showtime_id,
       s.movie_id,
-      s.start_time,
-      s.end_time,
+      s.start_time AS 'start_date',
+      s.end_time AS 'end_date',
       sc.screening_id,
       sc.room_id,
       sc.screening_date,
       sc.screening_format,
       sc.screening_translation,
+      sc.start_time,
+      sc.end_time,
       m.title AS movie_title,
       r.room_name,
       r.room_type
@@ -33,22 +35,19 @@ Showtime.getById = (id, callback) => {
     if (err) {
       return callback(err);
     }
-
-    // Xử lý dữ liệu để tránh lặp showtime
-    // if (results.length === 0) {
-    //   return callback(null, null); // Không tìm thấy showtime
-    // }
+    if (results.length === 0) {
+      return callback(null, null); 
+    }
     console.log(results, results[0])
 
-    // Lấy thông tin showtime từ bản ghi đầu tiên
     const showtime = {
       showtime_id: results[0].showtime_id,
       movie_id: results[0].movie_id,
-      start_time: results[0].start_time,
-      end_time: results[0].end_time,
-      // ... các cột khác
+      movie_title: results[0].movie_title,
+      start_time: results[0].start_date,
+      end_time: results[0].end_date,
       screenings: results
-        .filter(row => row.screening_id) // Lọc các bản ghi có screening
+        .filter(row => row.screening_id) 
         .map(row => ({
           screening_id: row.screening_id,
           room_id: row.room_id,
@@ -60,7 +59,6 @@ Showtime.getById = (id, callback) => {
           screening_translation: row.screening_translation,
           start_time: row.start_time,
           end_time: row.end_time,
-          // ... các cột khác
         }))
     };
 
@@ -68,13 +66,61 @@ Showtime.getById = (id, callback) => {
   });
 };
 
-Showtime.getAll = (callback) => {
-  const sqlString = "SELECT st.*, m.title as 'movie_title' FROM Showtimes st JOIN Movies m ON st.movie_id = m.movie_id ";
-  db.query(sqlString, (err, result) => {
+Showtime.getAll = (page = 1, limit = 10, status = '', callback) => {
+  page = Math.max(1, parseInt(page));
+  limit = Math.max(1, parseInt(limit));
+  const offset = (page - 1) * limit;
+
+  let sqlString = `
+    SELECT st.*, m.title as 'movie_title'
+    FROM Showtimes st
+    JOIN Movies m ON st.movie_id = m.movie_id
+  `;
+  let countSqlString = `
+    SELECT COUNT(*) as total
+    FROM Showtimes st
+    JOIN Movies m ON st.movie_id = m.movie_id
+  `;
+
+  const today = new Date().toISOString().split('T')[0]; 
+  let statusCondition = '';
+  if (status) {
+    if (status === 'Hoàn thành') {
+      statusCondition = `WHERE st.end_time < '${today}'`;
+    } else if (status === 'Sắp chiếu') {
+      statusCondition = `WHERE st.start_time > '${today}'`;
+    } else if (status === 'Đang chiếu') {
+      statusCondition = `WHERE st.start_time <= '${today}' AND st.end_time >= '${today}'`;
+    }
+  }
+
+  sqlString += ` ${statusCondition} ORDER BY st.start_time DESC LIMIT ? OFFSET ?`;
+  countSqlString += ` ${statusCondition}`;
+
+  db.query(countSqlString, (err, countResult) => {
     if (err) {
       return callback(err);
     }
-    callback(result);
+
+    const totalRecords = countResult[0].total;
+
+    db.query(sqlString, [limit, offset], (err, result) => {
+      if (err) {
+        return callback(err);
+      }
+
+      const paginationResult = {
+        data: result,
+        pagination: {
+          currentPage: page,
+          limit: limit,
+          totalRecords: totalRecords,
+          totalPages: Math.ceil(totalRecords / limit),
+        },
+      };
+
+      callback(null, paginationResult);
+    });
   });
 };
 

@@ -2,13 +2,20 @@ const showtime = require("../models/showtime.model");
 
 module.exports = {
   getAll: (req, res) => {
-    showtime.getAll((result) => {
-      res.send(result);
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 10; 
+    const status = req.query.status || '';
+    showtime.getAll(page, limit, status, (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Lỗi khi lấy dữ liệu' });
+      }
+      res.json(result);
     });
   },
 
   getById: (req, res) => {
     const id = req.params.id;
+    console.log(id)
     showtime.getById(id, (result) => {
       res.send(result);
     });
