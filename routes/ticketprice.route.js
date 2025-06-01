@@ -3,6 +3,7 @@ var router = express.Router();
 const ticketpriceController = require("../controllers/ticketprice.controller");
 /* GET ticketprices listing. */
 // Mock API - Kiểm tra có tồn tại không
+router.get('/ticket-price', ticketpriceController.getPriceBySeatAndScreening);
 router.get('/', ticketpriceController.getAll);
 router.get('/:id', ticketpriceController.getById);
 router.post('/', ticketpriceController.insert);

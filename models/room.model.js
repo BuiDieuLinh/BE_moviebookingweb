@@ -12,7 +12,7 @@ Room.getById = (id, callback) => {
     if (err) {
       return callback(err);
     }
-    callback(result);
+    callback(result.length > 0 ? result[0] : null);
   });
 };
 
