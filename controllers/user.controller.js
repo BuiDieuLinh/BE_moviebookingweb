@@ -1,7 +1,75 @@
 const user = require("../models/user.model");
+const { OAuth2Client } = require("google-auth-library")
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs')
 
+const client_id = process.env.GOOGLE_CLIENT_ID;
+const client = new OAuth2Client(client_id);
+async function verifyToken(token) {
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: client_id
+    });
+    const payload = ticket.getPayload();
+    return payload;
+}
+const googleLogin = async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      return res.status(400).json({ message: 'Yêu cầu cung cấp token' });
+    }
+
+    const payload = await verifyToken(token);
+    const { email, name, sub: googleId } = payload;
+
+    console.log('Checking email:', email);
+    user.getByEmail(email, (foundUser) => {
+      if (foundUser) {
+        console.log("Đăng nhập Google thành công cho người dùng hiện có:", email);
+        return res.status(200).json({
+          user_id: foundUser.user_id,
+          username: foundUser.username,
+          email: foundUser.email,
+          name: foundUser.fullname,
+          role: foundUser.role,
+        });
+      }
+
+      if(!foundUser){
+        const newUser = {
+            username: email.split('@')[0],
+            email,
+            fullname: name,
+            password: null,
+            role: 'customer',
+        };
+
+        user.insert(newUser, (result) => {
+            if (result.error) {
+            console.error("Lỗi khi tạo người dùng mới:", result.message);
+            return res.status(400).json({
+                field: result.field,
+                message: result.message,
+            });
+            }
+
+            console.log("Tạo và đăng nhập thành công người dùng Google mới:", email);
+            res.status(201).json({
+            user_id: result.id,
+            username: newUser.username,
+            email: newUser.email,
+            name: newUser.fullname,
+            role: newUser.role,
+            });
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Lỗi đăng nhập Google:", error.stack);
+    res.status(500).json({ message: 'Xác thực thất bại' });
+  }
+};
 
 const login = (req, res) => {
     const { username, password } = req.body;
@@ -43,7 +111,9 @@ const protectedRoute = (req, res) => {
 
 // Các chức năng CRUD cho user
 const getAll = (req, res) => {
-    user.getAll((result) => {
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 10; 
+    user.getAll(page, limit,(err, result) => {        
         res.send(result);
     });
 };
@@ -84,6 +154,14 @@ const update = (req, res) => {
     });
 };
 
+const updateRole = (req, res) => {
+    const role = req.body.role;
+    const id = req.params.id;
+    user.updateRole(role, id, (result) => {
+        res.send(result);
+    });
+};
+
 const deleteUser = (req, res) => {
     const id = req.params.id;
     user.delete(id, (result) => {
@@ -94,10 +172,12 @@ const deleteUser = (req, res) => {
 // Xuất tất cả chức năng trong một object
 module.exports = {
     login,
+    googleLogin,
     protectedRoute,
     getAll,
     getById,
     insert,
     update,
+    updateRole,
     delete: deleteUser
 };

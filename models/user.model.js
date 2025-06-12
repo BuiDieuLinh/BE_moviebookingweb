@@ -21,6 +21,18 @@ User.getByUsername = (username, callback) => {
       }
   });
 }
+User.getByEmail = (email, callback) => {
+  console.log('Trong User.getByEmail, callback:', typeof callback);
+  const sql = 'SELECT user_id, username, email, fullname, role FROM Users WHERE email = ?';
+  db.query(sql, email, (err, results) => {
+    if (err) {
+      console.error('Lỗi khi kiểm tra email:', err);
+      return callback(err);
+    }
+    console.log('Kết quả getByEmail:', results);
+    callback(results.length > 0 ? results[0] : null);
+  });
+};
 
 User.getById = (id, callback) => {
   const sqlString = "SELECT * FROM Users WHERE user_id = ? ";
@@ -32,13 +44,37 @@ User.getById = (id, callback) => {
   });
 };
 
-User.getAll = (callback) => {
-  const sqlString = "SELECT * FROM Users ";
-  db.query(sqlString, (err, result) => {
+User.getAll = (page = 1, limit = 10, callback) => {
+  page = Math.max(1, parseInt(page));
+  limit = Math.max(1, parseInt(limit));
+  const offset = (page - 1) * limit;
+  let sqlString = `SELECT * FROM Users u ORDER BY u.created_at DESC LIMIT ? OFFSET ?`;
+  let countSqlString = `
+    SELECT COUNT(*) as total
+    FROM Users `;
+
+  db.query(countSqlString, (err, countResult) => {
     if (err) {
       return callback(err);
     }
-    callback(result);
+    const totalRecords = countResult[0].total;
+    db.query(sqlString, [limit, offset], (err, result) => {
+      if (err) {
+        return callback(err);
+      }
+
+      const paginationResult = {
+        data: result,
+        pagination: {
+          currentPage: page,
+          limit: limit,
+          totalRecords: totalRecords,
+          totalPages: Math.ceil(totalRecords / limit),
+        },
+      };
+
+      callback(null, paginationResult);
+    });
   });
 };
 
@@ -81,6 +117,17 @@ User.update = (user, id, callBack) => {
       return;
     }
     callBack("cập người dùng id = " + id + " thành công");
+  });
+};
+
+User.updateRole = (role, id, callBack) => {
+  const sqlString = "UPDATE Users SET role = ? WHERE user_id = ?";
+  db.query(sqlString, [role, id], (err, res) => {
+    if (err) {
+      callBack(err);
+      return;
+    }
+    callBack("Cập nhật vai trò cho người dùng id = " + id + " thành công");
   });
 };
 
